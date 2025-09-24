@@ -1,0 +1,666 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual News Aggregator - Bias Detection MVP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'roboto': ['Roboto', 'sans-serif']
+                    },
+                    colors: {
+                        'primary': '#1976D2',
+                        'secondary': '#FF9800',
+                        'neutral-bias': '#4CAF50',
+                        'right-bias': '#F44336',
+                        'left-bias': '#2196F3',
+                        'positive-sentiment': '#4CAF50',
+                        'negative-sentiment': '#FF5722',
+                        'neutral-sentiment': '#9E9E9E'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-roboto bg-gray-50">
+    <!-- @COMPONENT: Header [navigation and search] -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-primary">NewsLens</h1>
+                        <span class="text-xs text-gray-500">Multilingual Bias Detection</span>
+                    </div>
+                </div>
+                
+                <div class="flex-1 max-w-lg mx-8">
+                    <div class="relative">
+                        <input type="text" 
+                               placeholder="Search news articles..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                               data-mock="true">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- @STATE: selectedLanguage:string = 'en' -->
+                    <div class="relative">
+                        <select class="appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+                                data-bind="selectedLanguage">
+                            <option value="en">English</option>
+                            <option value="hi">हिंदी (Hindi)</option>
+                            <option value="mr">मराठी (Marathi)</option>
+                            <option value="ta">தமிழ் (Tamil)</option>
+                            <option value="te">తెలుగు (Telugu)</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-2 top-3 text-gray-400 text-xs"></i>
+                    </div>
+                    
+                    <button class="p-2 text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- @COMPONENT: Sidebar [filters and categories] -->
+            <aside class="w-full lg:w-64 flex-shrink-0">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
+                    
+                    <!-- Category Filter -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Categories</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" checked data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">All Categories</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Politics</span>
+                                <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-full" data-mock="true">142</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Technology</span>
+                                <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-full" data-mock="true">89</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Health</span>
+                                <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-full" data-mock="true">67</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Finance</span>
+                                <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-full" data-mock="true">45</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Sports</span>
+                                <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-full" data-mock="true">32</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Bias Filter -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Political Bias</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary" checked data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">All Bias Types</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-neutral-bias focus:ring-neutral-bias" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Neutral</span>
+                                <div class="ml-auto w-3 h-3 bg-neutral-bias rounded-full"></div>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-left-bias focus:ring-left-bias" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Left-leaning</span>
+                                <div class="ml-auto w-3 h-3 bg-left-bias rounded-full"></div>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-right-bias focus:ring-right-bias" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Right-leaning</span>
+                                <div class="ml-auto w-3 h-3 bg-right-bias rounded-full"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sentiment Filter -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Emotional Tone</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-positive-sentiment focus:ring-positive-sentiment" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Positive</span>
+                                <i class="fas fa-smile ml-auto text-positive-sentiment"></i>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-neutral-sentiment focus:ring-neutral-sentiment" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Neutral</span>
+                                <i class="fas fa-meh ml-auto text-neutral-sentiment"></i>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded text-negative-sentiment focus:ring-negative-sentiment" data-mock="true">
+                                <span class="ml-2 text-sm text-gray-600">Negative</span>
+                                <i class="fas fa-frown ml-auto text-negative-sentiment"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Time Filter -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Time Range</h4>
+                        <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" data-mock="true">
+                            <option>Last 24 hours</option>
+                            <option>Last week</option>
+                            <option>Last month</option>
+                        </select>
+                    </div>
+                </div>
+            </aside>
+            <!-- @END_COMPONENT: Sidebar -->
+
+            <!-- @COMPONENT: MainContent [news articles grid] -->
+            <main class="flex-1">
+                <!-- Stats Bar -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-6">
+                            <div>
+                                <span class="text-2xl font-bold text-gray-900" data-bind="totalArticles" data-mock="true">1,247</span>
+                                <p class="text-sm text-gray-500">Total Articles</p>
+                            </div>
+                            <div>
+                                <span class="text-2xl font-bold text-primary" data-bind="todayArticles" data-mock="true">89</span>
+                                <p class="text-sm text-gray-500">Today</p>
+                            </div>
+                            <div>
+                                <span class="text-2xl font-bold text-secondary" data-bind="translatedArticles" data-mock="true">456</span>
+                                <p class="text-sm text-gray-500">Translated</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                    data-event="click:refreshFeed">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh Feed
+                            </button>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">Sort by:</span>
+                                <select class="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:border-primary" data-mock="true">
+                                    <option>Latest</option>
+                                    <option>Most Relevant</option>
+                                    <option>Most Translated</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- @MAP: newsArticles.map(article => ( -->
+                <!-- News Article Cards -->
+                <div class="space-y-6">
+                    <!-- Article 1: Politics with Right bias -->
+                    <article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Politics</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-2 bg-right-bias rounded-full" title="Right-leaning bias"></div>
+                                    <span class="text-xs text-gray-500">Right-leaning</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-frown text-negative-sentiment text-xs"></i>
+                                    <span class="text-xs text-gray-500">Negative tone</span>
+                                </div>
+                                <span class="text-xs text-gray-400">2 hours ago</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" data-bind="article.title" data-mock="true">
+                                        Parliament Debates New Digital Privacy Legislation Amid Growing Security Concerns
+                                    </h2>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-3" data-bind="article.summary" data-mock="true">
+                                        The Indian Parliament engaged in heated discussions over proposed digital privacy legislation that could reshape data protection laws. Critics argue the bill may grant excessive surveillance powers to government agencies, while supporters claim it's necessary for national security in an increasingly digital world.
+                                    </p>
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="text-sm text-gray-500" data-bind="article.source" data-mock="true">Times of India</span>
+                                            <span class="text-sm text-gray-400">•</span>
+                                            <span class="text-sm text-gray-500">By <span data-bind="article.author" data-mock="true">Rajesh Kumar</span></span>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex -space-x-1">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Hindi">हि</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Tamil">த</span>
+                                            </div>
+                                            
+                                            <button class="text-sm text-primary hover:text-blue-700 font-medium"
+                                                    data-event="click:translateArticle">
+                                                <i class="fas fa-language mr-1"></i>Translate
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:shareArticle">
+                                                <i class="fas fa-share-alt mr-1"></i>Share
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:bookmarkArticle">
+                                                <i class="fas fa-bookmark mr-1"></i>Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- A press conference with politicians at podiums in the Indian Parliament -->
+                                <div class="w-32 h-24 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=150" 
+                                         alt="Parliament debate session" 
+                                         class="w-full h-full object-cover rounded-lg"
+                                         data-mock-image="true">
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 2: Technology with Neutral bias -->
+                    <article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Technology</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-2 bg-neutral-bias rounded-full" title="Neutral bias"></div>
+                                    <span class="text-xs text-gray-500">Neutral</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-smile text-positive-sentiment text-xs"></i>
+                                    <span class="text-xs text-gray-500">Positive tone</span>
+                                </div>
+                                <span class="text-xs text-gray-400">4 hours ago</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" data-bind="article.title" data-mock="true">
+                                        Indian Startups Raise Record $8.3 Billion in Funding, AI and Fintech Lead Growth
+                                    </h2>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-3" data-bind="article.summary" data-mock="true">
+                                        India's startup ecosystem reached a new milestone with record funding of $8.3 billion across 847 deals this quarter. Artificial Intelligence and Financial Technology sectors dominated investments, showcasing the country's growing tech innovation capabilities and attracting global investor interest.
+                                    </p>
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="text-sm text-gray-500" data-bind="article.source" data-mock="true">TechCrunch India</span>
+                                            <span class="text-sm text-gray-400">•</span>
+                                            <span class="text-sm text-gray-500">By <span data-bind="article.author" data-mock="true">Priya Sharma</span></span>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex -space-x-1">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Hindi">हि</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-red-100 text-red-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Marathi">म</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Telugu">తె</span>
+                                            </div>
+                                            
+                                            <button class="text-sm text-primary hover:text-blue-700 font-medium"
+                                                    data-event="click:translateArticle">
+                                                <i class="fas fa-language mr-1"></i>Translate
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:shareArticle">
+                                                <i class="fas fa-share-alt mr-1"></i>Share
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:bookmarkArticle">
+                                                <i class="fas fa-bookmark mr-1"></i>Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modern office space with developers working on computers and startup atmosphere -->
+                                <div class="w-32 h-24 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=150" 
+                                         alt="Modern startup office" 
+                                         class="w-full h-full object-cover rounded-lg"
+                                         data-mock-image="true">
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 3: Health with Left bias -->
+                    <article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Health</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-2 bg-left-bias rounded-full" title="Left-leaning bias"></div>
+                                    <span class="text-xs text-gray-500">Left-leaning</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-meh text-neutral-sentiment text-xs"></i>
+                                    <span class="text-xs text-gray-500">Neutral tone</span>
+                                </div>
+                                <span class="text-xs text-gray-400">6 hours ago</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" data-bind="article.title" data-mock="true">
+                                        Universal Healthcare Expansion Reaches 500 Million Indians, Government Reports Success
+                                    </h2>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-3" data-bind="article.summary" data-mock="true">
+                                        India's Ayushman Bharat program has successfully enrolled over 500 million citizens, making it the world's largest government-funded healthcare initiative. The program has processed 2.5 crore treatments worth ₹35,000 crores, significantly reducing medical bankruptcy among low-income families across rural and urban areas.
+                                    </p>
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="text-sm text-gray-500" data-bind="article.source" data-mock="true">The Hindu</span>
+                                            <span class="text-sm text-gray-400">•</span>
+                                            <span class="text-sm text-gray-500">By <span data-bind="article.author" data-mock="true">Dr. Arjun Menon</span></span>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex -space-x-1">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Hindi">हि</span>
+                                            </div>
+                                            
+                                            <button class="text-sm text-primary hover:text-blue-700 font-medium"
+                                                    data-event="click:translateArticle">
+                                                <i class="fas fa-language mr-1"></i>Translate
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:shareArticle">
+                                                <i class="fas fa-share-alt mr-1"></i>Share
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:bookmarkArticle">
+                                                <i class="fas fa-bookmark mr-1"></i>Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modern Indian hospital with doctors and patients, clean and professional healthcare setting -->
+                                <div class="w-32 h-24 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=150" 
+                                         alt="Modern hospital facility" 
+                                         class="w-full h-full object-cover rounded-lg"
+                                         data-mock-image="true">
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 4: Finance with Neutral bias -->
+                    <article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Finance</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-2 bg-neutral-bias rounded-full" title="Neutral bias"></div>
+                                    <span class="text-xs text-gray-500">Neutral</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-smile text-positive-sentiment text-xs"></i>
+                                    <span class="text-xs text-gray-500">Positive tone</span>
+                                </div>
+                                <span class="text-xs text-gray-400">8 hours ago</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" data-bind="article.title" data-mock="true">
+                                        India's GDP Grows 7.2% in Q3, Leading Global Economic Recovery Among Major Economies
+                                    </h2>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-3" data-bind="article.summary" data-mock="true">
+                                        India maintained its position as the fastest-growing major economy with a 7.2% GDP growth rate in the third quarter. Strong domestic consumption, increased manufacturing output, and robust services sector performance drove the expansion, exceeding economist predictions and strengthening the rupee against major currencies.
+                                    </p>
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="text-sm text-gray-500" data-bind="article.source" data-mock="true">Economic Times</span>
+                                            <span class="text-sm text-gray-400">•</span>
+                                            <span class="text-sm text-gray-500">By <span data-bind="article.author" data-mock="true">Sanjay Gupta</span></span>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex -space-x-1">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Tamil">த</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Telugu">తె</span>
+                                            </div>
+                                            
+                                            <button class="text-sm text-primary hover:text-blue-700 font-medium"
+                                                    data-event="click:translateArticle">
+                                                <i class="fas fa-language mr-1"></i>Translate
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:shareArticle">
+                                                <i class="fas fa-share-alt mr-1"></i>Share
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:bookmarkArticle">
+                                                <i class="fas fa-bookmark mr-1"></i>Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modern Indian stock exchange floor with traders and financial data displays -->
+                                <div class="w-32 h-24 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=150" 
+                                         alt="Stock market trading floor" 
+                                         class="w-full h-full object-cover rounded-lg"
+                                         data-mock-image="true">
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 5: Sports with Neutral bias -->
+                    <article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Sports</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-2 bg-neutral-bias rounded-full" title="Neutral bias"></div>
+                                    <span class="text-xs text-gray-500">Neutral</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-smile text-positive-sentiment text-xs"></i>
+                                    <span class="text-xs text-gray-500">Positive tone</span>
+                                </div>
+                                <span class="text-xs text-gray-400">12 hours ago</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" data-bind="article.title" data-mock="true">
+                                        Indian Cricket Team Clinches Historic Series Victory in Australia, Fans Celebrate Nationwide
+                                    </h2>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-3" data-bind="article.summary" data-mock="true">
+                                        Team India secured a remarkable 3-1 Test series victory against Australia on their home ground, marking only the second time in cricket history that India has achieved such a feat Down Under. Captain Rohit Sharma and star batsman Virat Kohli led the charge with exceptional performances throughout the series.
+                                    </p>
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="text-sm text-gray-500" data-bind="article.source" data-mock="true">ESPN Cricinfo</span>
+                                            <span class="text-sm text-gray-400">•</span>
+                                            <span class="text-sm text-gray-500">By <span data-bind="article.author" data-mock="true">Ravi Shankar</span></span>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex -space-x-1">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Hindi">हि</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-red-100 text-red-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Marathi">म</span>
+                                                <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs font-medium border-2 border-white" title="Available in Tamil">த</span>
+                                            </div>
+                                            
+                                            <button class="text-sm text-primary hover:text-blue-700 font-medium"
+                                                    data-event="click:translateArticle">
+                                                <i class="fas fa-language mr-1"></i>Translate
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:shareArticle">
+                                                <i class="fas fa-share-alt mr-1"></i>Share
+                                            </button>
+                                            <button class="text-sm text-gray-500 hover:text-gray-700"
+                                                    data-event="click:bookmarkArticle">
+                                                <i class="fas fa-bookmark mr-1"></i>Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Cricket match action shot with Indian players celebrating victory in stadium -->
+                                <div class="w-32 h-24 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=150" 
+                                         alt="Cricket players celebrating victory" 
+                                         class="w-full h-full object-cover rounded-lg"
+                                         data-mock-image="true">
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <!-- @END_MAP )) -->
+
+                <!-- Load More Button -->
+                <div class="flex justify-center mt-8">
+                    <button class="px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium"
+                            data-event="click:loadMoreArticles">
+                        <i class="fas fa-plus-circle mr-2"></i>Load More Articles
+                    </button>
+                </div>
+            </main>
+            <!-- @END_COMPONENT: MainContent -->
+        </div>
+    </div>
+
+    <!-- @COMPONENT: TranslationModal [overlay for article translation] -->
+    <div id="translationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Article Translation</h3>
+                <button class="text-gray-400 hover:text-gray-600" onclick="closeTranslationModal()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-3">Original (English)</h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h5 class="font-semibold mb-2" data-mock="true">Parliament Debates New Digital Privacy Legislation</h5>
+                            <p class="text-sm text-gray-600" data-mock="true">The Indian Parliament engaged in heated discussions over proposed digital privacy legislation that could reshape data protection laws...</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-900">Translation</h4>
+                            <select class="border border-gray-300 rounded-md px-3 py-1 text-sm" data-mock="true">
+                                <option>हिंदी (Hindi)</option>
+                                <option>मराठी (Marathi)</option>
+                                <option>தமிழ் (Tamil)</option>
+                                <option>తెలుగు (Telugu)</option>
+                            </select>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h5 class="font-semibold mb-2" data-mock="true">संसद में नई डिजिटल प्राइवेसी कानून पर बहस</h5>
+                            <p class="text-sm text-gray-600" data-mock="true">भारतीय संसद में प्रस्तावित डिजिटल प्राइवेसी कानून पर गहन चर्चा हुई जो डेटा सुरक्षा कानूनों को बदल सकता है...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" onclick="closeTranslationModal()">
+                        Close
+                    </button>
+                    <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-copy mr-2"></i>Copy Translation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: TranslationModal -->
+
+    <!-- Floating Action Button for Quick Actions -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <div class="relative">
+            <button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    data-event="click:toggleQuickActions">
+                <i class="fas fa-plus text-xl"></i>
+            </button>
+            
+            <!-- Quick Actions Menu (hidden by default) -->
+            <div class="absolute bottom-16 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 w-48 hidden">
+                <button class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                    <i class="fas fa-rss mr-3 text-gray-400"></i>Add RSS Feed
+                </button>
+                <button class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                    <i class="fas fa-bell mr-3 text-gray-400"></i>Set Alerts
+                </button>
+                <button class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                    <i class="fas fa-download mr-3 text-gray-400"></i>Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Translation modal functionality
+            function showTranslationModal() {
+                document.getElementById('translationModal').classList.remove('hidden');
+            }
+            
+            window.closeTranslationModal = function() {
+                document.getElementById('translationModal').classList.add('hidden');
+            }
+            
+            // Event delegation for translate buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('[data-event*="translateArticle"]')) {
+                    e.preventDefault();
+                    showTranslationModal();
+                }
+            });
+            
+            // Auto-refresh functionality (mock)
+            setInterval(function() {
+                // TODO: Implement actual news feed refresh
+                console.log('Auto-refreshing news feed...');
+            }, 300000); // 5 minutes
+        })();
+    </script>
+</body>
+</html>

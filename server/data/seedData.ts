@@ -1,0 +1,97 @@
+import type { InsertArticle } from '@shared/schema';
+
+const newsSourceUrls = [
+  'https://www.thehindu.com',
+  'https://www.ndtv.com', 
+  'https://indianexpress.com',
+  'https://www.business-standard.com',
+  'https://timesofindia.indiatimes.com',
+  'https://economictimes.indiatimes.com'
+];
+
+const getSourceUrl = (index: number): string => {
+  return newsSourceUrls[index % newsSourceUrls.length];
+};
+
+export const seedArticles: InsertArticle[] = [
+  {
+    title: "Digital Infrastructure Expansion Accelerates Across Rural India",
+    content: "India's digital transformation continues with significant investments in rural connectivity infrastructure. The latest government initiative aims to bridge the digital divide through comprehensive broadband expansion programs. Industry experts highlight the potential economic impact of enhanced digital access in remote areas.",
+    summary: "Government launches major rural digital connectivity initiative",
+    url: getSourceUrl(0),
+    imageUrl: "https://images.unsplash.com/photo-1606868306217-dbf5046868d2?w=400",
+    source: "Tech Today India",
+    author: "Priya Sharma",
+    category: "technology",
+    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    politicalBias: "neutral",
+    biasConfidence: 0.8,
+    sentimentScore: 0.6,
+    emotionalTone: "positive",
+    availableLanguages: [],
+  },
+  {
+    title: "Healthcare Innovation Shows Promise in Metropolitan Areas",
+    content: "Healthcare technology adoption accelerates in urban centers with new telemedicine platforms gaining traction. Medical professionals report improved patient outcomes through digital health solutions. The integration of advanced diagnostic tools continues to reshape healthcare delivery across major cities.",
+    summary: "Urban healthcare embraces digital transformation",
+    url: getSourceUrl(1),
+    imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
+    source: "Health India Today",
+    author: "Dr. Meera Singh",
+    category: "health",
+    publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    politicalBias: "neutral",
+    biasConfidence: 0.8,
+    sentimentScore: 0.7,
+    emotionalTone: "positive",
+    availableLanguages: [],
+  },
+  {
+    title: "Financial Services Sector Sees Regulatory Updates",
+    content: "Recent policy changes in financial services aim to enhance consumer protection and market stability. Industry stakeholders express varied responses to the new regulatory framework. The measures focus on transparency and accountability in financial transactions.",
+    summary: "New financial regulations emphasize consumer protection",
+    url: getSourceUrl(2),
+    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400",
+    source: "Economic Times",
+    author: "Sunita Patel",
+    category: "finance",
+    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+    politicalBias: "neutral",
+    biasConfidence: 0.7,
+    sentimentScore: 0.4,
+    emotionalTone: "neutral",
+    availableLanguages: [],
+  },
+  {
+    title: "Sports Infrastructure Development Gains Momentum",
+    content: "Investment in sports facilities continues across multiple states with focus on youth development programs. Community sports initiatives see increased participation rates. Local authorities emphasize the importance of accessible recreational facilities for public health.",
+    summary: "Sports facility development supports community wellness",
+    url: getSourceUrl(3),
+    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400",
+    source: "Sports Central",
+    author: "Anil Mehta",
+    category: "sports",
+    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    politicalBias: "neutral",
+    biasConfidence: 0.9,
+    sentimentScore: 0.6,
+    emotionalTone: "positive",
+    availableLanguages: [],
+  },
+  {
+    title: "Educational Technology Integration Shows Mixed Results",
+    content: "Schools nationwide report varying success rates with digital learning platforms. Educators highlight both opportunities and challenges in technology adoption. Student engagement metrics indicate the need for balanced approaches to educational innovation.",
+    summary: "Educational institutions evaluate digital learning effectiveness",
+    url: getSourceUrl(4),
+    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400",
+    source: "Education News",
+    author: "Meera Patel",
+    category: "general",
+    publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000),
+    politicalBias: "neutral",
+    biasConfidence: 0.8,
+    sentimentScore: 0.3,
+    emotionalTone: "neutral",
+    availableLanguages: [],
+  }
+];
