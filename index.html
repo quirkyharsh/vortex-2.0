@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Varta.AI - Multilingual Bias Detection</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="logo">Varta.AI <span>Multilingual Bias Detection</span></div>
+    <input type="text" placeholder="Search news articles..." class="search" />
+    <div class="controls">
+      <select>
+        <option>English</option>
+        <option>Hindi</option>
+      </select>
+      <span class="welcome">Welcome, Sairaj</span>
+      <button class="logout">Logout</button>
+    </div>
+  </header>
+
+  <!-- Banner -->
+  <div class="banner">
+    Welcome to Varta.AI, Sairaj Patil! Set up your preferences to get personalized news recommendations.
+  </div>
+
+  <!-- Main Layout -->
+  <main class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h3>Filters</h3>
+      <div class="filter-group">
+        <h4>Categories</h4>
+        <label><input type="checkbox" checked> All Categories</label>
+        <label><input type="checkbox"> General</label>
+        <label><input type="checkbox"> Politics</label>
+        <label><input type="checkbox"> Technology</label>
+        <label><input type="checkbox"> Health</label>
+        <label><input type="checkbox"> Finance</label>
+        <label><input type="checkbox"> Sports</label>
+      </div>
+
+      <div class="filter-group">
+        <h4>Bias Types</h4>
+        <label><input type="checkbox" checked> All Bias Types</label>
+        <label><input type="checkbox"> Neutral</label>
+        <label><input type="checkbox"> Left</label>
+        <label><input type="checkbox"> Right</label>
+      </div>
+
+      <div class="filter-group">
+        <h4>Sentiments</h4>
+        <label><input type="checkbox"> Positive</label>
+        <label><input type="checkbox"> Negative</label>
+        <label><input type="checkbox"> Neutral</label>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <section class="content">
+      <div class="stats">
+        <p><strong>39</strong> Total Articles | <strong>39</strong> Today’s Articles | <strong>0</strong> Translated Articles</p>
+        <button class="refresh">Refresh</button>
+        <select>
+          <option>Latest</option>
+          <option>Oldest</option>
+        </select>
+      </div>
+
+      <!-- Article Card -->
+      <div class="article">
+        <span class="tag politics">Politics</span>
+        <h2>Parliament Passes Data Protection Bill</h2>
+        <p class="meta">Legal Today · By Adv. Priya Sharma · <span>Unverified</span></p>
+        <p>New data protection law requires explicit consent for data collection</p>
+        <div class="actions">
+          <button>Translate</button>
+          <button>Ask AI</button>
+          <button>Share</button>
+          <button>Save</button>
+        </div>
+      </div>
+
+      <div class="article">
+        <span class="tag tech">Technology</span>
+        <h2>India’s AI Revolution: New Tech Hub Opens in Bengaluru</h2>
+        <p class="meta">Tech Today · By Priya Sharma · <span>Unverified</span></p>
+        <p>New AI Research Center Expected to Create 2,000 Jobs</p>
+        <div class="actions">
+          <button>Translate</button>
+          <button>Ask AI</button>
+          <button>Share</button>
+          <button>Save</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
